@@ -1,0 +1,53 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify adminmedia %}
+
+{% block extrahead %}{{ block.super }}
+	{% url admin:jsi18n as jsi18nurl %}
+	<script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
+	{{ media }}
+{% endblock %}
+
+{% block extrastyle %}
+	{{ block.super }}
+	<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/forms.css" />
+{% endblock %}
+
+{% block breadcrumbs %}{% if not is_popup %}
+<div class="breadcrumbs">
+	<a href="../../../">{% trans "Home" %}</a> &rsaquo;
+	<a href="../../">{{ app_label|capfirst|escape }}</a> &rsaquo;
+	{% if has_change_permission %}<a href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %} &rsaquo; 
+	{% if add %}{% trans "Add" %} {{ opts.verbose_name }}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+</div>
+{% endif %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+	<form enctype="multipart/form-data" action="" method="post">
+		{% if form.errors %}
+			<p class="errornote">
+				{% blocktrans count form.errors|length as counter %} Foi encontrado um erro no preenchimento deste formulário
+				{% plural %} Foram encontrados erros no preenchimento deste formulário
+				{% endblocktrans %}
+			</p>
+		{% endif %}
+		<fieldset class='module aligned'>
+		{% for f in form %}
+			<div class='form-row'>
+				{% if f.errors %}{{ f.errors }}{% endif %}
+				<div>
+					{{ f.label_tag }}
+					{{f}}
+				</div>
+			</div>
+		{% endfor%}
+		</fieldset>
+		<div class="submit-row">
+			<input type="submit" name="_save" class="default" value="Salvar">
+			<input type="submit" name="_addanother" value="Salvar e adicionar outro">
+			<input type="submit" name="_continue" value="Salvar e continuar editando">
+		</div>
+	</form>
+</div>
+{% endblock %}
+

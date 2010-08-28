@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<menu>
+{% for form in form_list %}
+	<formulario>
+		<nome>{{ form.nome }}</nome>
+		<tipo>{{ form.tipo }}</tipo>
+		<address>{{ form.path }}</address>
+	</formulario>
+{% endfor %}
+</menu>
