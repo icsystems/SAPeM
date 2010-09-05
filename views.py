@@ -17,6 +17,8 @@ from django.contrib.auth import authenticate, login,logout
 
 from forms.models import UnidadeSaude
 
+import settings
+
 def getState(cep):
 	state =''
 	prefixo = int(cep[0:5])
@@ -138,9 +140,9 @@ class PatientForm(forms.Form):
 
 	class Media:
 		# Plug in the javascript we will need:
-		css = {'all':("/custom-media/css/jquery-ui.css",)}
-		js =  ( "/custom-media/js/jquery/jquery.min.js",
-				"/custom-media/js/jquery/jquery.ui.js")
+		css = {'all':(settings.SITE_ROOT+ "/custom-media/css/jquery-ui.css",)}
+		js =  (settings.SITE_ROOT+  "/custom-media/js/jquery/jquery.min.js",
+				settings.SITE_ROOT+ "/custom-media/js/jquery/jquery.ui.js")
 
 	def __init__(self, *args, **kwargs):
 		super(PatientForm,self).__init__(*args,**kwargs)
@@ -173,12 +175,12 @@ def sapem_login(request):
 		if user is not None:
 			if user.is_active:
 				login(request, user)
-				return HttpResponseRedirect('/')
+				return HttpResponseRedirect(settings.SITE_ROOT)
 			return direct_to_template(request, 'inactive_account.html')
 		return direct_to_template(request, 'invalid_login.html')
 
 def sapem_logout(request):
 	logout(request)
-	return HttpResponseRedirect('/')
+	return HttpResponseRedirect(settings.SITE_ROOT)
 
 

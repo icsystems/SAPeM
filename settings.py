@@ -11,9 +11,11 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
+#Site URL. Please edit if the system is moved
+SITE_ROOT = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/'
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = 'tb.db'             # Or path to database file if using sqlite3.
+DATABASE_NAME = os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'tb.db')             # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -38,22 +40,22 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'custom-media') + '/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = SITE_ROOT + '/custom-media/'
+
 
 ##FIX
 #CUSTOM Media prefix
-MEDIA_PREFIX = os.path.realpath('custom-media')+'/'
+#MEDIA_PREFIX = 
 
-print MEDIA_PREFIX
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = SITE_ROOT + '/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'udzx9q+!1x@1#i(a^^lct-@s4dxqk(uk)5r9kvifr88+jspxxz'
@@ -77,7 +79,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-	'%s'%(os.path.realpath('templates'),),
+	'%s'%(os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'templates'),),
 )
 
 INSTALLED_APPS = (

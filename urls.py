@@ -19,7 +19,7 @@ urlpatterns = patterns('',
 	# Uncomment the admin/doc line below and add 'django.contrib.admindocs'
 	# to INSTALLED_APPS to enable admin documentation:
 	# (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-	(r'^custom-media/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.MEDIA_PREFIX, 'show_indexes': True}),
+	(r'^custom-media/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
 	# Uncomment the next line to enable the admin:
 	(r'^admin/forms/formulario/add/$', add_formulario),
 	(r'^admin/forms/formulario/(\d)/$', edit_formulario),

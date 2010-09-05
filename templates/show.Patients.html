@@ -3,11 +3,11 @@
 	<head>
 		<title>SAPeM - Sistema de Apoio a Pesquisa Médica</title>
 		<style type="text/css" title="currentStyle">
-			@import "{{ MEDIA }}css/pages.css";
-			@import "{{ MEDIA }}css/dataTable.css";
+			@import "{{ MEDIA_URL }}css/pages.css";
+			@import "{{ MEDIA_URL }}css/dataTable.css";
 		</style>
 		{{ form.media }}
-		<script type="text/javascript" language="javascript" src="{{ MEDIA }}js/jquery/jquery.dataTables.js"></script>
+		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.dataTables.js"></script>
 
 		<script>
 		jQuery(function() {
@@ -103,7 +103,7 @@
 								<td>  {{ p.data_nascimento }} </td>
 								<td>  {{ p.nome_mae }} </td>
 								{% for f in forms_list%}
-									<td> <img src='{{ MEDIA }}/images/ed_InsertForm_n.gif' class='insertComment'/> </td>
+									<td> <img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment'/> </td>
 								{% endfor %}
 							</tr>
 							{% endfor %}
