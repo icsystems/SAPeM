@@ -16,6 +16,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login,logout
 
 from forms.models import UnidadeSaude
+from unicodedata import normalize
+
 
 import settings
 
@@ -107,9 +109,40 @@ def list_forms_by_health_unit(request, healthUnit):
 	return  render_to_response('showForms.html',
 			locals(), RequestContext(request, {}))
 
-def show_form(request, formId, f=''):
-	import_str = 'from forms.models import Formulario'
+def normalizeString(txt, codif='utf-8'):
+	txt = normalize('NFKD', txt.decode(codif)).encode('ASCII','ignore')
+	return txt.lower()
+
+def createXML(keys, dictValues):
+	xmlStr = u'<?xml version="1.0" encoding="utf-8"?>'
+	xmlStr += u'<documento>'
+	xmlStr += u'<paciente>'
+	xmlStr += u'<triagem>'
+	for k in keys:
+		xmlStr += u'<%s>%s</%s>'%(k,dictValues[k],k)
+	xmlStr += u'</triagem>'
+	xmlStr += u'</paciente>'
+	xmlStr += u'</documento>'
+	return xmlStr
+
+def handle_form(request, formId, patientId, f=''):
+	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario'
 	exec import_str
+	if request.method == 'POST':
+		form = request.POST
+		keys = [k for k in form]
+		xmlStr = createXML(keys, form)
+		p = Paciente.objects.get(id=int(patientId))
+		f = Formulario.objects.get(id=int(formId))
+		newFicha = Ficha(
+			paciente   = p,
+			formulario = f,
+			#conteudo   = normalizeString(xmlStr)
+			conteudo   = xmlStr
+		)
+		newFicha.save()
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	# else
 	form = Formulario.objects.get(id=int(formId))
 	pathname, moduleFormName = os.path.split(form.path)
 	pathname ='%s/'%(pathname,)
@@ -166,6 +199,15 @@ def show_patients(request):
 	form = PatientForm(auto_id=True)
 	patient_list = Paciente.objects.all()
 	forms_list   = Formulario.objects.all()
+	patient_dict = {}
+	for p in patient_list:
+		patient_dict[p] = []
+		for f in forms_list:
+			for us in p.unidadesaude.all():
+				if us in f.unidadesaude.all():
+					patient_dict[p].append(f.id)
+					break
+	url = settings.SITE_ROOT
 	return render_to_response('show.Patients.html',
 			locals(), RequestContext(request, {}))
 

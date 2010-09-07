@@ -97,14 +97,20 @@
 							</tr>
 							</thead>
 							<tbody>
-							{% for p in patient_list  %}
+							{% for p, forms in patient_dict.items  %}
 							<tr>
 								<td>  {{ p.nome }} </td>
 								<td>  {{ p.data_nascimento }} </td>
 								<td>  {{ p.nome_mae }} </td>
-								{% for f in forms_list%}
-									<td> <img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment'/> </td>
+								<td>
+								{% for f in forms_list %}
+									{% if f.id in forms%}
+										<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/' target='_blank'>
+											<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment'/>
+										</a>
+									{% endif %}
 								{% endfor %}
+								</td>
 							</tr>
 							{% endfor %}
 							</tbody>

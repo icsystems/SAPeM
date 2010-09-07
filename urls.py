@@ -6,7 +6,7 @@ from django.contrib import admin
 from tbForms.admin_views import edit_formulario, add_formulario
 from tbForms.views import correct_address
 from tbForms.views import list_forms_by_health_unit
-from tbForms.views import show_form
+from tbForms.views import handle_form
 from tbForms.views import show_patients
 from tbForms.views import sapem_login
 from tbForms.views import sapem_logout
@@ -26,8 +26,7 @@ urlpatterns = patterns('',
 	(r'^admin/', include(admin.site.urls)),
 	(r'^addressService/cep/(\d{5}-\d{3})/$', correct_address),
 	(r'^showForms/(?P<healthUnit>\d)/$', list_forms_by_health_unit),
-	(r'^showForm/(?P<formId>\d+)/(?P<f>.*)$', show_form),
-	#(r'^showForm/(?P<formId>\d+)/postXML/$', post_form_xml),
+	(r'^form/(?P<formId>\d+)/(?P<patientId>\d+)/(?P<f>.*)$', handle_form),
 	(r'^$', show_patients),
 	(r'^login/$', sapem_login),
 	(r'^logout/$', sapem_logout),

@@ -32,14 +32,6 @@ class tipoFormulario(models.Model):
 	def __str__(self):
 		return self.nome.encode('utf-8')
 
-class Ficha(models.Model):
-	paciente                  = models.ForeignKey(Paciente)
-	tipo                      = models.ForeignKey(tipoFormulario)
-	conteudo                  = models.XMLField()
-	data_insercao             = models.DateTimeField(auto_now_add=True)
-	data_ultima_modificacao   = models.DateTimeField(auto_now=True)
-
-
 class Formulario(models.Model):
 	nome            = models.CharField(max_length=300)
 	version         = models.CharField(max_length=300)
@@ -77,4 +69,10 @@ class UserProfile(User):
 	unidadesaude    = models.ManyToManyField(UnidadeSaude)
 	objects         = UserManager()
 
+class Ficha(models.Model):
+	paciente                  = models.ForeignKey(Paciente)
+	formulario                = models.ForeignKey(Formulario)
+	conteudo                  = models.XMLField()
+	data_insercao             = models.DateTimeField(auto_now_add=True)
+	data_ultima_modificacao   = models.DateTimeField(auto_now=True)
 

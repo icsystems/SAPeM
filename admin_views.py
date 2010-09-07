@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-import tempfile
+
+# Work around made due the fact gruyere has an outdated version of tempfile
+# module
+import tempfile2 as tempfile
 import tarfile
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -14,10 +17,11 @@ from django.forms import ModelForm
 from django.contrib.admin.util import model_ngettext
 from django.utils.translation import ugettext_lazy, ugettext as _
 
-
 from django.contrib.admin.views.decorators import staff_member_required
 
 from forms.models import Formulario, tipoFormulario, UnidadeSaude
+
+import settings
 
 
 class FormularioForm(forms.Form):
@@ -43,6 +47,11 @@ class FormularioEditForm(ModelForm):
 		model = Formulario
 		exclude = ('nome', 'version','path', 'data_insercao')
 
+class UploadError(Exception):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return self.value
 
 def handle_uploaded_file(f):
 	destination = tempfile.NamedTemporaryFile(suffix='.tar.gz', delete=False)
@@ -51,7 +60,7 @@ def handle_uploaded_file(f):
 	destination.seek(0)
 	destination.close()
 	tar = tarfile.open(destination.name)
-	final_path = "%s/modules/%s"%(os.path.realpath('.'), '.'.join(f.name.split('.')[0:-2]))
+	final_path = "%s/%s"%( os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules'), '.'.join(f.name.split('.')[0:-2]))
 	dirname, filename = os.path.split(final_path)
 	prefix, suffix = os.path.splitext(filename)
 	final_path = tempfile.mkdtemp(suffix, prefix+'_', dirname)
@@ -79,10 +88,11 @@ def add_formulario(request, app_label='Forms' ):
 			pathname ='%s/'%(pathname,)
 			if not pathname in sys.path:
 				sys.path.append(pathname)
-			try:
-				moduleForm = __import__(moduleFormName)
-			except ImportError:
-				return HttpResponseRedirect('/admin/forms/formulario/')
+			moduleForm = __import__(moduleFormName)
+			#try:
+			#	moduleForm = __import__(moduleFormName)
+			#except ImportError:
+			#	return HttpResponseRedirect(settings.SITE_ROOT + '/admin/forms/formulario/')
 			tipoForm = tipoFormulario.objects.get(nome=form.cleaned_data['tipo'])
 			newForm = Formulario(
 				nome=moduleForm.name,
@@ -95,7 +105,7 @@ def add_formulario(request, app_label='Forms' ):
 			for us_nome in form.cleaned_data['unidadesaude']:
 				us = UnidadeSaude.objects.filter(nome=us_nome)[0]
 				newForm.unidadesaude.add(us)
-			return HttpResponseRedirect('/admin/forms/formulario/')
+			return HttpResponseRedirect(settings.SITE_ROOT + '/admin/forms/formulario/')
 	else:
 		form = FormularioForm(auto_id=True)
 	add = True
