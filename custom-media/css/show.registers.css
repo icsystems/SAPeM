@@ -1,0 +1,30 @@
+.list-header{
+	background-color: #B9D3EE;
+	color : #000066;
+	font-size: 18px;
+	padding:  10px;
+	margin-bottom: 10px;
+}
+
+.row-content {
+	margin-bottom: 50px;
+}
+
+.row-content table {
+	margin-left: 25px;
+	font-size: 14px;
+	text-align: left;
+}
+
+
+.row-content table tr {
+	border-bottom: 1px solid #000066;
+}
+
+.row-content table th{
+	padding: 7px;
+	min-width : 300px;
+}
+.row-content table td{
+	padding: 7px;
+}

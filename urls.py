@@ -8,8 +8,12 @@ from tbForms.views import correct_address
 from tbForms.views import list_forms_by_health_unit
 from tbForms.views import handle_form
 from tbForms.views import show_patients
+from tbForms.views import list_patients
 from tbForms.views import sapem_login
 from tbForms.views import sapem_logout
+from tbForms.views import showPatientLastRegister
+from tbForms.views import showPatientRegisters
+from tbForms.views import homepage_view
 
 admin.autodiscover()
 
@@ -27,7 +31,11 @@ urlpatterns = patterns('',
 	(r'^addressService/cep/(\d{5}-\d{3})/$', correct_address),
 	(r'^showForms/(?P<healthUnit>\d)/$', list_forms_by_health_unit),
 	(r'^form/(?P<formId>\d+)/(?P<patientId>\d+)/(?P<f>.*)$', handle_form),
-	(r'^$', show_patients),
+	(r'^patientLastRegister/(?P<formId>\d+)/(?P<patientId>\d+)/$', showPatientLastRegister),
+	(r'^registers/(?P<formId>\d+)/(?P<patientId>\d+)/$', showPatientRegisters),
+	(r'^patients/$', show_patients),
+	(r'^listPatients/$', list_patients),
+	(r'^$', homepage_view),
 	(r'^login/$', sapem_login),
 	(r'^logout/$', sapem_logout),
 )

@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<style type="text/css" title="currentStyle">
+			@import "{{ MEDIA_URL }}css/pages.css";
+		</style>
+	</head>
+	<body>
+		<div id='content'>
+			<div id='header'>
+				<div id='branding'> &nbsp;</div>
+				<div id='user-tools'>
+					<a href='{{ url }}'>Página Inicial</a>
+				</div>
+			</div>
+			{% block content %}
+				<div id='maincontent'>
+					<div class='error-msg'> {{ msg }} </div>
+				</div>
+			{% endblock %}
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,32 +1,24 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load forms_extras %}
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>SAPeM - Sistema de Apoio a Pesquisa Médica</title>
 		<style type="text/css" title="currentStyle">
 			@import "{{ MEDIA_URL }}css/pages.css";
 			@import "{{ MEDIA_URL }}css/dataTable.css";
 		</style>
 		{{ form.media }}
 		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.dataTables.js"></script>
-
 		<script>
-		jQuery(function() {
-			jQuery(".date").datepicker({
-				dateFormat: 'dd/mm/yy',
-				monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio',
-				'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro',
-				'Dezembro'],
-				maxDate: '+0d',
-				changeMonth: true,
-				changeYear: true,
-				maxDate   : '+0y',
-				minDate   : '-130y',
-				yearRange : '-130:+130',
-				dayNamesMin: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
-			});
-		});
 		$(document).ready(function() {
-			$('#patient_table').dataTable({
+			var oTable = $('#patient_table').dataTable({
+				"aoColumns"      : [
+					null,
+					{'bSortable':false},
+					{'bSortable':false},
+					{'bSortable':false}
+				],
+				"iDisplayLength": 25,
+				"sPaginationType": "full_numbers",
 				"oLanguage" : {
 					"sProcessing":   "Processando...",
 					"sLengthMenu":   "Mostrar _MENU_ registros",
@@ -35,7 +27,7 @@
 					"sInfoEmpty":    "Mostrando de 0 até 0 de 0 registros",
 					"sInfoFiltered": "(filtrado de _MAX_ registros no total)",
 					"sInfoPostFix":  "",
-					"sSearch":       "Buscar:",
+					"sSearch":       "Busca:",
 					"sUrl":          "",
 					"oPaginate": {
 						"sFirst":    "Primeiro",
@@ -51,7 +43,7 @@
 	<body>
 		<div id='content'>
 			<div id='header'>
-				<div id='branding'> SAPeM - Sistema de Apoio a Pesquisa Médica </div>
+				<div id='branding'>&nbsp;</div>
 				<div id='user-tools'>
 					{% if user.is_authenticated %}
 						Bem vindo, <strong>{{ user.username }}</strong>.
@@ -68,22 +60,6 @@
 			{% if user.is_authenticated %}
 			<!-- Authenticate account menu -->
 				<div id='maincontent'>
-					<div id='divPatientForm'>
-						<form method='POST'>
-							<fieldset>
-								<legend> Adicionar Paciente </legend>
-								{% for field in form %}
-									<div>
-										{{ field.errors }}
-										{{ field.label_tag }} : {{ field }}
-									</div>
-								{% endfor %}
-								<div id='divSubmit'>
-									<input type='submit' value='Adicionar' />
-								</div>
-							</fieldset>
-						</form>
-					</div>
 					<div id='divPatientTable'>
 						<table id='patient_table' class='display'>
 							<thead>
@@ -97,45 +73,29 @@
 							</tr>
 							</thead>
 							<tbody>
-							{% for p, forms in patient_dict.items  %}
+							{% for p, forms in patient_forms.items  %}
 							<tr>
 								<td>  {{ p.nome }} </td>
 								<td>  {{ p.data_nascimento }} </td>
 								<td>  {{ p.nome_mae }} </td>
-								<td>
 								{% for f in forms_list %}
+									<td>
 									{% if f.id in forms%}
-										<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/' target='_blank'>
-											<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment'/>
+										<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/'>
+											<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment icon'/>
 										</a>
+										{% if f.id in patient_fichas|hash:p.id %}
+											<a href='{{ url }}registers/{{ f.id }}/{{ p.id }}/'>
+												<img src='{{ MEDIA_URL }}/images/icon-view-eye.gif' class='viewReport icon' target='_blank'/>
+											</a>
+										{% endif %}
 									{% endif %}
+									</td>
 								{% endfor %}
-								</td>
 							</tr>
 							{% endfor %}
 							</tbody>
 						</table>
-					</div>
-				</div>
-			{% else %}
-				<div id='login-container'>
-					<div id='login'>
-						<form action="login/" method="post" accept-charset="utf-8">
-							<fieldset>
-								<legend> Acessar o sistema </legend>
-								<div id='divLogin'>
-									<label for="username">Nome do Usuário:</label>
-									<input type="text" name="username" value="" id="username" />
-								</div>
-								<div id='divPassword'>
-									<label for="password">Senha:</label>
-									<input type="password" name="password" value="" id="password" />
-								</div>
-								<div id='divSubmit'>
-									<input type="submit" value="Entrar">
-								</div>
-							</fieldset>
-						</form>
 					</div>
 				</div>
 			{% endif %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load forms_extras %}
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<style type="text/css" title="currentStyle">
+			@import "{{ MEDIA_URL }}css/pages.css";
+			@import "{{ MEDIA_URL }}css/dataTable.css";
+		</style>
+		{{ form.media }}
+		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.dataTables.js"></script>
+
+	</head>
+	<body>
+		<div id='content'>
+			<div id='header'>
+				<div id='branding'>&nbsp;</div>
+				<div id='user-tools'>
+					{% if user.is_authenticated %}
+						Bem vindo, <strong>{{ user.username }}</strong>.
+						{% if user.is_staff %}
+							<a href='admin/'>Administração</a> /
+						{% endif %}
+						<a href='logout/'>Encerrar sessão</a>
+					{% else %}
+						<a href='admin/'>Administração</a>
+					{% endif %}
+				</div>
+			</div>
+			{% if user.is_authenticated %}
+				<div class='msg'> Selecione uma ação </div>
+				<div class='dashboard-container'>
+					<div class='dashboard'>
+						<ul>
+							<li> <a href='' >Adicionar Paciente (Triagem)</a> </li>
+							<li> <a href='patients'>Acessar Formulários</a> </li>
+							<li> <a href='listPatients' >Listar os pacientes</a> </li>
+							<li> <a href='search' >Buscar por paciente</a> </li>
+						</ul>
+					</div>
+				</div>
+			{% else %}
+				<div class='error-msg'> {{ msg }} </div>
+				<div id='login-container'>
+					<div id='login'>
+						<form action="{{ url }}login/" method="post" accept-charset="utf-8">
+							<fieldset>
+								<legend> Acessar o sistema </legend>
+								<div id='divLogin'>
+									<label for="username">Nome do Usuário:</label>
+									<input type="text" name="username" value="" id="username" />
+								</div>
+								<div id='divPassword'>
+									<label for="password">Senha:</label>
+									<input type="password" name="password" value="" id="password" />
+								</div>
+								<div id='divSubmit'>
+									<input type="submit" value="Entrar">
+								</div>
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			{% endif %}
+			</div>
+		</div>
+	</body>
+</html>
