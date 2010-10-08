@@ -12,7 +12,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 #Site URL. Please edit if the system is moved
-SITE_ROOT = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/'
+#SITE_ROOT = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/'
+SITE_ROOT = 'http://localhost:8000/'
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'tb.db')             # Or path to database file if using sqlite3.
@@ -45,7 +46,7 @@ MEDIA_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'custom-
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = SITE_ROOT + '/custom-media/'
+MEDIA_URL = SITE_ROOT + 'custom-media/'
 
 
 ##FIX
@@ -55,7 +56,7 @@ MEDIA_URL = SITE_ROOT + '/custom-media/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = SITE_ROOT + '/media/'
+ADMIN_MEDIA_PREFIX = SITE_ROOT + 'media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'udzx9q+!1x@1#i(a^^lct-@s4dxqk(uk)5r9kvifr88+jspxxz'

@@ -17,7 +17,7 @@ class UnidadeSaudeAdmin(admin.ModelAdmin):
 	list_display  = ('nome', 'cidade', 'UF')
 	list_filter   = ('cidade', 'UF')
 	class Media:
-		js= ('/custom-media/js/jquery/admin_formulario.js',)
+		js= ('custom-media/js/jquery/admin_formulario.js',)
 admin.site.register(UnidadeSaude, UnidadeSaudeAdmin)
 
 class FormularioAdmin(admin.ModelAdmin):

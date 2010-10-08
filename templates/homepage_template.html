@@ -6,8 +6,22 @@
 			@import "{{ MEDIA_URL }}css/pages.css";
 			@import "{{ MEDIA_URL }}css/dataTable.css";
 		</style>
+		<style type="text/css" title="currentStyle">
+			ul.sub_menu{
+				display:none;
+			}
+		</style>
 		{{ form.media }}
+		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.js"></script>
 		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.dataTables.js"></script>
+		<script type="text/javascript">
+
+		$(document).ready(function() {
+				$('#triagem_menu').click(function () {
+					$('ul.sub_menu').slideToggle('medium');
+				});
+			});
+		</script>
 
 	</head>
 	<body>
@@ -31,10 +45,19 @@
 				<div class='dashboard-container'>
 					<div class='dashboard'>
 						<ul>
-							<li> <a href='' >Adicionar Paciente (Triagem)</a> </li>
+							<li id='triagem_menu'> <a href='#' >Adicionar Paciente (Triagem)</a> </li>
+								<ul  class="sub_menu">
+									{% for f in triagem_form_list %}
+									<li>
+										<a href='{{ url }}form/{{ f.id }}/0'>
+										{{ f.nome }}
+										<div class='explanation'> <small> {{ f.descricao }} </small> </div>
+										</a>
+									</li>
+									{% endfor %}
+								</ul>
 							<li> <a href='patients'>Acessar Formulários</a> </li>
-							<li> <a href='listPatients' >Listar os pacientes</a> </li>
-							<li> <a href='search' >Buscar por paciente</a> </li>
+							<li> <a href='listPatients' >Listar/Buscar Pacientes</a> </li>
 						</ul>
 					</div>
 				</div>

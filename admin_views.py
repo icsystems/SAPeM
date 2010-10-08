@@ -3,8 +3,8 @@
 
 import os, sys
 
-# Work around made due the fact gruyere has an outdated version of tempfile
-# module
+# Work around made due the fact production version has an outdated version of
+# tempfile module
 import tempfile2 as tempfile
 import tarfile
 
@@ -105,7 +105,7 @@ def add_formulario(request, app_label='Forms' ):
 			for us_nome in form.cleaned_data['unidadesaude']:
 				us = UnidadeSaude.objects.filter(nome=us_nome)[0]
 				newForm.unidadesaude.add(us)
-			return HttpResponseRedirect(settings.SITE_ROOT + '/admin/forms/formulario/')
+			return HttpResponseRedirect(settings.SITE_ROOT + 'admin/forms/formulario/')
 	else:
 		form = FormularioForm(auto_id=True)
 	add = True

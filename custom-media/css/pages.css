@@ -188,9 +188,27 @@ body {
 	padding-left: 10px;
 	text-decoration: none;
 }
-
 .dashboard li a:hover {
 	background: #A9FFFF repeat-x bottom left;
 	color: #000066;
+	text-decoration: none;
+}
+.dashboard ul.sub_menu li a{
+	background: #FFDAB9 repeat-x bottom left;
+	font: 300 20px "Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+	color:#663333;
+	display: block;
+	width: auto;
+	padding: 10px 0;
+	padding-left: 20px;
+	text-decoration: none;
+}
+.dashboard ul.sub_menu li a small {
+	font-style: italic;
+	font-size: 12px ;
+}
+.dashboard ul.sub_menu li a:hover {
+	background: #FFF380 repeat-x bottom left;
+	color: #663333;
 	text-decoration: none;
 }

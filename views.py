@@ -136,9 +136,22 @@ def handle_form(request, formId, patientId, f=''):
 	exec import_str
 	if request.method == 'POST':
 		form = request.POST
+		if patientId == 0: # new patient
+			nome = form['nome']
+			nome_mae = form['nome_mae']
+			data_nascimento = form['data_nascimento']
+			new_patient = Paciente(
+				nome=nome,
+				nome_mae = nome_mae,
+				data_nascimento=data_nascimento
+			)
+			# TODO treat duplicated entries
+			new_patient.save()
+			p = new_patient
+		else:
+			p = Paciente.objects.get(id=int(patientId))
 		keys = [k for k in form]
 		xmlStr = createXML(keys, form)
-		p = Paciente.objects.get(id=int(patientId))
 		f = Formulario.objects.get(id=int(formId))
 		newFicha = Ficha(
 			paciente   = p,
@@ -163,32 +176,12 @@ def handle_form(request, formId, patientId, f=''):
 			locals(), RequestContext(request, {}))
 	return moduleForm.handle_request(request, f)
 
-class PatientForm(forms.Form):
-	nome    = forms.CharField(widget=forms.TextInput(attrs={'class':'textInput'}))
-	data_nascimento= forms.DateTimeField(  ('%d/%m/%Y',),
-										label='Data de Nascimento',
-										widget=forms.DateTimeInput(format='%d/%m/%Y',
-											attrs={
-												'class':'input date',
-												'readonly':'readonly',
-												'size':'15'
-												})
-									)
-	nome_mae    = forms.CharField(label=u'Nome da Mãe',
-								widget=forms.TextInput(attrs={'class':'textInput'}))
-	unidadesaude = forms.ModelChoiceField(queryset=UnidadeSaude.objects.all(),
-									label=u'Unidade de Saúde')
-
-	class Media:
-		# Plug in the javascript we will need:
-		css = {'all':(settings.SITE_ROOT+ "/custom-media/css/jquery-ui.css",)}
-		js =  (settings.SITE_ROOT+  "/custom-media/js/jquery/jquery.min.js",
-				settings.SITE_ROOT+ "/custom-media/js/jquery/jquery.ui.js")
-
-	def __init__(self, *args, **kwargs):
-		super(PatientForm,self).__init__(*args,**kwargs)
-
 def homepage_view(request):
+	import_str = 'from forms.models import tipoFormulario, Formulario'
+	exec import_str
+	ft = tipoFormulario.objects.get(nome='Triagem')
+	triagem_form_list = Formulario.objects.filter(tipo=ft)
+	url = settings.SITE_ROOT
 	return render_to_response('homepage_template.html',
 			locals(), RequestContext(request, {}))
 
@@ -206,7 +199,7 @@ def show_patients(request):
 		return HttpResponseRedirect(settings.SITE_ROOT)
 	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario'
 	exec import_str
-	MEDIA = '/custom-media/'
+	MEDIA = 'custom-media/'
 	us_list = UnidadeSaude.objects.all()
 	form = PatientForm(auto_id=True)
 	patient_list = Paciente.objects.all()
