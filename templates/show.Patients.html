@@ -6,7 +6,7 @@
 			@import "{{ MEDIA_URL }}css/pages.css";
 			@import "{{ MEDIA_URL }}css/dataTable.css";
 		</style>
-		{{ form.media }}
+		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.js"></script>
 		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.dataTables.js"></script>
 		<script>
 		$(document).ready(function() {
@@ -81,9 +81,11 @@
 								{% for f in forms_list %}
 									<td>
 									{% if f.id in forms%}
-										<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/'>
-											<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment icon'/>
-										</a>
+										{% if f.permitir_insercao_multipla and f.id in patient_fichas|hash:p.id %}
+											<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/'>
+												<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment icon'/>
+											</a>
+										{% endif %}
 										{% if f.id in patient_fichas|hash:p.id %}
 											<a href='{{ url }}registers/{{ f.id }}/{{ p.id }}/'>
 												<img src='{{ MEDIA_URL }}/images/icon-view-eye.gif' class='viewReport icon' target='_blank'/>

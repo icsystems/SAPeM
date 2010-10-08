@@ -36,6 +36,7 @@ class Formulario(models.Model):
 	nome            = models.CharField(max_length=300)
 	version         = models.CharField(max_length=300)
 	tipo            = models.ForeignKey(tipoFormulario)
+	permitir_insercao_multipla = models.BooleanField(u"Permitir a inserção de múltiplas entradas desse formulário")
 	path            = models.CharField(max_length=300)
 	descricao       = models.TextField()
 	data_insercao   = models.DateTimeField(auto_now_add=True)
@@ -46,7 +47,6 @@ class Formulario(models.Model):
 	#Custom delete action
 	def delete(self, *args, **kwargs):
 		try:
-			print 'DELETE ', self.path
 			shutil.rmtree(self.path)
 		except OSError:
 			pass

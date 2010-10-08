@@ -28,10 +28,12 @@ class FormularioForm(forms.Form):
 	tipo         = forms.ChoiceField()
 	arquivo      = forms.FileField(max_length=300)
 	descricao    = forms.CharField(widget=forms.Textarea())
+	permitir_insercao_multipla    = forms.BooleanField (u"Permitir a inserção de múltiplas entradas desse formulário")
 	unidadesaude = forms.ModelMultipleChoiceField(queryset=UnidadeSaude.objects.all())
 	def __init__(self, *args, **kwargs):
 		super(FormularioForm,self).__init__(*args,**kwargs)
 		self.fields['tipo'].choices = self.get_type_options()
+		self.fields['permitir_insercao_multipla'].verbose_name = u"Permitir a inserção de múltiplas entradas desse formulário"
 	def get_type_options(self):
 		import_forms = 'from forms.models import *'
 		exec import_forms
@@ -99,7 +101,8 @@ def add_formulario(request, app_label='Forms' ):
 				version=moduleForm.version,
 				path=path,
 				tipo_id=tipoForm.id,
-				descricao=form.cleaned_data['descricao']
+				descricao=form.cleaned_data['descricao'],
+				permitir_insercao_multipla = form.cleaned_data['permitir_insercao_multipla']
 			)
 			newForm.save()
 			for us_nome in form.cleaned_data['unidadesaude']:
@@ -114,7 +117,7 @@ def add_formulario(request, app_label='Forms' ):
 
 def edit_formulario(request, f_id, app_label='Forms'):
 	if not request.user.is_authenticated():
-		return HttpResponseRedirect('/admin/')
+		return HttpResponseRedirect(settings.SITE_ROOT + 'admin/')
 	f = Formulario.objects.get(id=int(f_id))
 	if request.method == 'POST':
 		form = FormularioEditForm(request.POST, instance=f)
@@ -123,7 +126,7 @@ def edit_formulario(request, f_id, app_label='Forms'):
 			f.tipo = tipoForm[0]
 			f.descricao = form.cleaned_data['descricao']
 			f.save()
-			return HttpResponseRedirect('/admin/forms/formulario/')
+			return HttpResponseRedirect(settings.SITE_ROOT +'admin/forms/formulario/')
 	else:
 		form = FormularioEditForm(instance=f)
 	opts = meta_data(u'Formulário')

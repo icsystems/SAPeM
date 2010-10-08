@@ -12,8 +12,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 #Site URL. Please edit if the system is moved
-#SITE_ROOT = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/'
-SITE_ROOT = 'http://localhost:8000/'
+SITE_ROOT = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/'
+#SITE_ROOT = 'http://localhost:8000/'
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'tb.db')             # Or path to database file if using sqlite3.

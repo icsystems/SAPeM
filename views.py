@@ -190,7 +190,6 @@ def list_patients(request):
 		return HttpResponseRedirect(settings.SITE_ROOT)
 	import_str = 'from forms.models import Paciente, UnidadeSaude'
 	exec import_str
-	form = PatientForm(auto_id=True)
 	patient_list = Paciente.objects.all()
 	return render_to_response('list.Patients.html',
 			locals(), RequestContext(request, {}))
@@ -201,7 +200,6 @@ def show_patients(request):
 	exec import_str
 	MEDIA = 'custom-media/'
 	us_list = UnidadeSaude.objects.all()
-	form = PatientForm(auto_id=True)
 	patient_list = Paciente.objects.all()
 	forms_list   = Formulario.objects.all()
 	patient_forms  = {}
