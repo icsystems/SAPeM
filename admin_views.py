@@ -28,7 +28,7 @@ class FormularioForm(forms.Form):
 	tipo         = forms.ChoiceField()
 	arquivo      = forms.FileField(max_length=300)
 	descricao    = forms.CharField(widget=forms.Textarea())
-	permitir_insercao_multipla    = forms.BooleanField (u"Permitir a inserção de múltiplas entradas desse formulário")
+	permitir_insercao_multipla    = forms.BooleanField (required=False)
 	unidadesaude = forms.ModelMultipleChoiceField(queryset=UnidadeSaude.objects.all())
 	def __init__(self, *args, **kwargs):
 		super(FormularioForm,self).__init__(*args,**kwargs)
@@ -96,13 +96,18 @@ def add_formulario(request, app_label='Forms' ):
 			#except ImportError:
 			#	return HttpResponseRedirect(settings.SITE_ROOT + '/admin/forms/formulario/')
 			tipoForm = tipoFormulario.objects.get(nome=form.cleaned_data['tipo'])
+			tp =form.cleaned_data['permitir_insercao_multipla']
+			if tp:
+				tp = True
+			else:
+				tp = False
 			newForm = Formulario(
 				nome=moduleForm.name,
 				version=moduleForm.version,
 				path=path,
 				tipo_id=tipoForm.id,
 				descricao=form.cleaned_data['descricao'],
-				permitir_insercao_multipla = form.cleaned_data['permitir_insercao_multipla']
+				permitir_insercao_multipla = tp
 			)
 			newForm.save()
 			for us_nome in form.cleaned_data['unidadesaude']:
