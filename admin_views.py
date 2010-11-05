@@ -29,7 +29,6 @@ class FormularioForm(forms.Form):
 	arquivo      = forms.FileField(max_length=300)
 	descricao    = forms.CharField(widget=forms.Textarea())
 	permitir_insercao_multipla    = forms.BooleanField (required=False)
-	unidadesaude = forms.ModelMultipleChoiceField(queryset=UnidadeSaude.objects.all())
 	def __init__(self, *args, **kwargs):
 		super(FormularioForm,self).__init__(*args,**kwargs)
 		self.fields['tipo'].choices = self.get_type_options()
@@ -110,9 +109,6 @@ def add_formulario(request, app_label='Forms' ):
 				permitir_insercao_multipla = tp
 			)
 			newForm.save()
-			for us_nome in form.cleaned_data['unidadesaude']:
-				us = UnidadeSaude.objects.filter(nome=us_nome)[0]
-				newForm.unidadesaude.add(us)
 			return HttpResponseRedirect(settings.SITE_ROOT + 'admin/forms/formulario/')
 	else:
 		form = FormularioForm(auto_id=True)

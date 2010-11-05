@@ -1,0 +1,4 @@
+. Se um grupo remover um membro, verificar no Objeto UserProfile se Unidade de Saude ainda é valida
+. View para Alterar Unidade de Saude Atual (durante sessao no sistema)  ** Unidade ao qual o usuario se loga
+. Adicionar Semaforo
+

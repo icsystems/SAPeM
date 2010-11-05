@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from tbForms.forms.models import Paciente, Ficha, tipoFormulario
 from tbForms.forms.models import Formulario, UnidadeSaude
+from tbForms.forms.models import Grupo_Formulario, Grupo
 from django import template
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin import helpers
@@ -17,11 +18,11 @@ class UnidadeSaudeAdmin(admin.ModelAdmin):
 	list_display  = ('nome', 'cidade', 'UF')
 	list_filter   = ('cidade', 'UF')
 	class Media:
-		js= ('custom-media/js/jquery/admin_formulario.js',)
+		js= ('js/jquery/admin_formulario.js',)
 admin.site.register(UnidadeSaude, UnidadeSaudeAdmin)
 
 class FormularioAdmin(admin.ModelAdmin):
-	list_display  = ('nome','version', 'tipo', 'descricao', 'data_insercao', 'listUnidadeSaude' )
+	list_display  = ('nome','version', 'tipo', 'descricao', 'data_insercao')
 	list_filter   = ('nome', 'tipo', 'data_insercao')
 	actions       = ['uninstall_form']
 	def get_actions(self, request):
@@ -59,8 +60,22 @@ class FormularioAdmin(admin.ModelAdmin):
 				})
 		return None
 	uninstall_form.short_description = ugettext_lazy(u"Desinstalar %(verbose_name_plural)s selecionados")
+
 admin.site.register(Formulario, FormularioAdmin)
+admin.site.register(tipoFormulario)
 
+#Users definitions
 
+class Grupo_Formulario_Inline(admin.TabularInline):
+	model = Grupo_Formulario
+	extra = 1
 
+class UserAdmin(admin.ModelAdmin):
+	inlines = (Grupo_Formulario_Inline,)
+
+class GrupoAdmin(admin.ModelAdmin):
+	list_display  = ('nome','unidadesaude')
+	inlines = (Grupo_Formulario_Inline,)
+
+admin.site.register(Grupo, GrupoAdmin)
 

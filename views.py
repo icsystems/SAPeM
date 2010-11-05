@@ -4,22 +4,22 @@
 import os,sys
 import tempfile
 import tarfile
+from unicodedata import normalize
 from datetime import datetime, date, time
 
-from django.http import HttpResponse,HttpResponseNotFound, HttpResponseRedirect
-from django.views.generic.simple import direct_to_template
-from django.template import RequestContext
-from django.shortcuts import render_to_response
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django import forms
+
+from django.http import HttpResponse,HttpResponseNotFound, HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login,logout
-
-from forms.models import UnidadeSaude
-from unicodedata import normalize
-
+from django.views.generic.simple import direct_to_template
 
 import settings
+from forms.models import UnidadeSaude
 
 class customError(Exception):
 	def __init__(self, value):
@@ -136,7 +136,7 @@ def handle_form(request, formId, patientId, f=''):
 	exec import_str
 	if request.method == 'POST':
 		form = request.POST
-		if patientId == 0: # new patient
+		if int(patientId) == 0: # new patient
 			nome = form['nome']
 			nome_mae = form['nome_mae']
 			data_nascimento = form['data_nascimento']
@@ -152,11 +152,12 @@ def handle_form(request, formId, patientId, f=''):
 			p = Paciente.objects.get(id=int(patientId))
 		keys = [k for k in form]
 		xmlStr = createXML(keys, form)
+		us = request.user.get_profile().unidadesaude_favorita
 		f = Formulario.objects.get(id=int(formId))
 		newFicha = Ficha(
 			paciente   = p,
 			formulario = f,
-			#conteudo   = normalizeString(xmlStr)
+			unidadesaude = us,
 			conteudo   = xmlStr
 		)
 		newFicha.save()
@@ -176,45 +177,101 @@ def handle_form(request, formId, patientId, f=''):
 			locals(), RequestContext(request, {}))
 	return moduleForm.handle_request(request, f)
 
+
 def homepage_view(request):
-	import_str = 'from forms.models import tipoFormulario, Formulario'
+	import_str = "from forms.models import tipoFormulario, Formulario, Grupo, Grupo_Formulario, UserProfile"
 	exec import_str
-	ft = tipoFormulario.objects.get(nome='Triagem')
-	triagem_form_list = Formulario.objects.filter(tipo=ft)
+	if request.user.is_authenticated():
+		us_favorite = None
+		groups = Grupo.objects.filter(membros=request.user)
+		try:
+			us_favorite = request.user.get_profile().unidadesaude_favorita
+			if not us_favorite: #User did not belong to a group
+				# Check whether now he belongs to one and set a favorite US
+				groups = Grupo.objects.filter(membros=request.user)
+				if groups.count():
+					us_favorite= groups[0].unidadesaude
+					profile = request.user.get_profile()
+					profile.unidadesaude_favorita = us_favorite
+					profile.save()
+		except UserProfile.DoesNotExist: #Profile was not created yet
+			if groups.count():
+				us_favorite= groups[0].unidadesaude
+			if us_favorite:
+				profile = UserProfile(unidadesaude_favorita= us_favorite, user=request.user)
+			else:
+				profile = UserProfile(user=request.user)
+			profile.save()
+		ft = tipoFormulario.objects.get(nome='Triagem')
+		triagem_form_list = Formulario.objects.filter(tipo=ft)
+		# Remove forms that the user does not have permission
+		for f in triagem_form_list:
+			if groups.count():
+				for gr in groups:
+					gf = Grupo_Formulario.objects.filter(formulario=f).filter(grupo=gr)
+					if gf.count():
+						if gf[0].permissao != 'T':
+							del f
+			else: #User does not belong to any group, so do not access any form
+				triagem_form_list = Formulario.objects.none()
 	url = settings.SITE_ROOT
 	return render_to_response('homepage_template.html',
+			locals(), RequestContext(request, {}))
+
+def getPatientList(us):
+	import_str = 'from forms.models import Paciente, Ficha, Formulario, Grupo, Grupo_Formulario'
+	exec import_str
+	patient_list = []
+	fichas = Ficha.objects.filter(formulario__tipo__nome='Triagem').filter(unidadesaude__in = us)
+	if fichas:
+		for f in fichas:
+			patient_list.append(f.paciente)
+	return patient_list
+
+def getFilledFormsId(patient):
+	import_str = 'from forms.models import Paciente, Ficha, Formulario'
+	exec import_str
+	retList = []
+	fichas = Ficha.objects.select_related().filter(paciente=patient)
+	retList = [ f.formulario.id for f in fichas]
+	return retList
+
+def show_patients(request):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario, Grupo, Grupo_Formulario'
+	exec import_str
+	MEDIA = 'custom-media/'
+	groups       = Grupo.objects.filter(membros=request.user)
+	us_list = []
+	for gr in groups:
+		#Get "Unidade de Saudes" that the user's groups belong to.
+		us_list.append(gr.unidadesaude)
+	#Get "Unidade de Saude" related to the user's defined
+	for us in us_list:
+		for us2 in us.relacionamento.all():
+			if us2 not in us_list:
+				us_list.append(us2)
+	forms_list = [ gf.formulario for gf in Grupo_Formulario.objects.filter(grupo__in = groups)]
+	patient_list = getPatientList(us_list)
+	patient_fichas = {}
+	for p in patient_list:
+		patient_fichas[p.id] = getFilledFormsId(p)
+	url = settings.SITE_ROOT
+	return render_to_response('show.Patients.html',
 			locals(), RequestContext(request, {}))
 
 def list_patients(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect(settings.SITE_ROOT)
-	import_str = 'from forms.models import Paciente, UnidadeSaude'
+	import_str = 'from forms.models import Paciente, UnidadeSaude, Grupo'
 	exec import_str
-	patient_list = Paciente.objects.all()
+	groups       = Grupo.objects.filter(membros=request.user)
+	us_list = []
+	for gr in groups:
+		us_list.append(gr.unidadesaude)
+	patient_list = getPatientList(us_list)
 	return render_to_response('list.Patients.html',
-			locals(), RequestContext(request, {}))
-def show_patients(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect(settings.SITE_ROOT)
-	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario'
-	exec import_str
-	MEDIA = 'custom-media/'
-	us_list = UnidadeSaude.objects.all()
-	patient_list = Paciente.objects.all()
-	forms_list   = Formulario.objects.all()
-	patient_forms  = {}
-	patient_fichas = {}
-	for p in patient_list:
-		patient_forms[p] = []
-		for f in forms_list:
-			for us in p.unidadesaude.all():
-				if us in f.unidadesaude.all():
-					patient_forms[p].append(f.id)
-					break
-		fichas_qs = Ficha.objects.select_related().filter(paciente=p)
-		patient_fichas[p.id] = set([ f.formulario.id for f in fichas_qs ])
-	url = settings.SITE_ROOT
-	return render_to_response('show.Patients.html',
 			locals(), RequestContext(request, {}))
 
 def sapem_login(request):
@@ -229,7 +286,7 @@ def sapem_login(request):
 			return render_to_response('error.html',
 				locals(), RequestContext(request, {}))
 		msg = u'Usuário e/ou senha inválida'
-		return render_to_response('show.Patients.html',
+		return render_to_response('homepage_template.html',
 			locals(), RequestContext(request, {}))
 
 def sapem_logout(request):
@@ -239,9 +296,13 @@ def sapem_logout(request):
 def retrieveFichas(patientId, formType='' ,lastInserted=True):
 	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario, tipoFormulario'
 	exec import_str
-	patient = Paciente.objects.get(id=patientId)
-	register_qs = Ficha.objects.filter(paciente=patient)
 	register_list =[]
+	try:
+		patient = Paciente.objects.get(id=patientId)
+	except Paciente.DoesNotExist:
+		register_list.append("<?xml version='1.0' encoding='UTF-8' ?><error>Paciente não achado</error>")
+		return register_list
+	register_qs = Ficha.objects.filter(paciente=patient)
 	if formType != '':
 		t = tipoFormulario.objects.get(nome=formType)
 		register_qs = register_qs.filter(formulario__tipo=t)
@@ -258,16 +319,19 @@ def showPatientLastRegister(request,patientId, formId):
 		return HttpResponseRedirect(settings.SITE_ROOT)
 	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario'
 	exec import_str
-	form = Formulario.objects.get(id=formId)
 	try:
-		xml = retrieveFichas(int(patientId), form.tipo)[0].conteudo
-	except customError, e:
-		msg = e.value
-		if request.method == 'GET':
-			url = settings.SITE_ROOT
-			return render_to_response('error.html',
-				locals(), RequestContext(request, {}))
-		return HttpResponseNotFound('A busca não retornou resultados')
+		form = Formulario.objects.get(id=formId)
+		try:
+			xml = retrieveFichas(int(patientId), form.tipo)[0].conteudo
+		except customError, e:
+			msg = e.value
+			if request.method == 'GET':
+				url = settings.SITE_ROOT
+				return render_to_response('error.html',
+					locals(), RequestContext(request, {}))
+			return HttpResponseNotFound('A busca não retornou resultados')
+	except Formulario.DoesNotExist:
+		xml = "<?xml version='1.0' encoding='UTF-8' ?><error>Formulario não achado</error>"
 	return HttpResponse(xml)
 
 def showPatientRegisters(request,patientId, formId):
@@ -286,8 +350,9 @@ def showPatientRegisters(request,patientId, formId):
 				locals(), RequestContext(request, {}))
 		return HttpResponseNotFound('A busca não retornou resultados')
 	registers = {}
+	patient = Paciente.objects.get(id=int(patientId))
 	for r in register_list:
-		registers[r.data_ultima_modificacao] = r.conteudo
+		registers[r.data_insercao] = r.conteudo
 	return render_to_response('show.registers.html',
 		locals(), RequestContext(request, {}))
 

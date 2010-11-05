@@ -48,7 +48,6 @@ MEDIA_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)) , 'custom-
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = SITE_ROOT + 'custom-media/'
 
-
 ##FIX
 #CUSTOM Media prefix
 #MEDIA_PREFIX = 
@@ -68,6 +67,17 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
+# Custom user  profile
+AUTH_PROFILE_MODULE = 'forms.UserProfile'
+
+#       user's models
+# ----> This was commented 'cause it refers to an old way of extending the
+# AUTHENTICATION_BACKENDS = (
+#	'tbForms.auth_backends.CustomUserModelBackend',
+#)
+#CUSTOM_USER_MODEL = 'forms.UserProfile'
+
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -84,13 +94,19 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.sites',
 	'tbForms.forms',
 	'tbForms.autocomplete',
 	'django.contrib.admin',
 )
 
-
+TEMPLATE_CONTEXT_PROCESSORS = (
+	"django.contrib.auth.context_processors.auth",
+	"django.core.context_processors.debug",
+	"django.core.context_processors.i18n",
+	"django.core.context_processors.media",
+	"django.contrib.messages.context_processors.messages",
+	"tbForms.contextprocessor.siteroot")

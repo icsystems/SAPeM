@@ -14,7 +14,6 @@
 				"aoColumns"      : [
 					null,
 					{'bSortable':false},
-					{'bSortable':false},
 					{'bSortable':false}
 				],
 				"iDisplayLength": 25,
@@ -73,15 +72,14 @@
 							</tr>
 							</thead>
 							<tbody>
-							{% for p, forms in patient_forms.items  %}
+							{% for p in patient_list  %}
 							<tr>
 								<td>  {{ p.nome }} </td>
 								<td>  {{ p.data_nascimento }} </td>
 								<td>  {{ p.nome_mae }} </td>
 								{% for f in forms_list %}
 									<td>
-									{% if f.id in forms%}
-										{% if f.permitir_insercao_multipla and f.id in patient_fichas|hash:p.id %}
+										{% if f.permitir_insercao_multipla or not  f.id in patient_fichas|hash:p.id %}
 											<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/'>
 												<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment icon'/>
 											</a>
@@ -91,7 +89,6 @@
 												<img src='{{ MEDIA_URL }}/images/icon-view-eye.gif' class='viewReport icon' target='_blank'/>
 											</a>
 										{% endif %}
-									{% endif %}
 									</td>
 								{% endfor %}
 							</tr>

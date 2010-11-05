@@ -38,14 +38,17 @@
 			</div>
 			{% block content %}
 				<div id='maincontent'>
+					<div id='divNameHeader'>
+						{{ patient.nome }}
+					</div>
 					{% for date, xml in registers.items %}
 						<div class='list-header'>
-						Modificado em {{ date|date:"d/M/Y" }}
+						Informações inseridas em {{ date|date:"d/M/Y" }}, {{date|date:"H:i:s"}}
 						</div>
-						<div class='row-content' id='row-content-{{date|date:'Ymdh'}}'>
+						<div class='row-content' id='row-content-{{date|date:'YmdHis'}}'>
 						<script type='text/javascript'>
 							{% autoescape off %}
-							writeTable("{{ xml|addslashes }}", $('#row-content-{{date|date:'Ymdh'}}'));
+							writeTable("{{ xml|addslashes }}", $('#row-content-{{date|date:'YmdHis'}}'));
 							{% endautoescape %}
 						</script>
 						</div>

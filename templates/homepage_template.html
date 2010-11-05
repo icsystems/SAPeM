@@ -41,6 +41,7 @@
 				</div>
 			</div>
 			{% if user.is_authenticated %}
+				<div class='usChoice'> Sua unidade atual: <u>{{ us_favorite|default:"Nenhuma unidade de saúde configurada (Entre em contato com o administrador)" }}</u> </div>
 				<div class='msg'> Selecione uma ação </div>
 				<div class='dashboard-container'>
 					<div class='dashboard'>
@@ -54,9 +55,15 @@
 										<div class='explanation'> <small> {{ f.descricao }} </small> </div>
 										</a>
 									</li>
+									{% empty %}
+									<li>
+										<a href='#'>
+										<div class='explanation'> <small> Nenhum formulário de triagem disponível </small></div>
+										</a>
+									</li>
 									{% endfor %}
 								</ul>
-							<li> <a href='patients'>Acessar Formulários / Buscar Pacientes</a> </li>
+							<li> <a href='patients'>Acessar Formulários</a> </li>
 							<li> <a href='listPatients' >Listar Pacientes</a> </li>
 						</ul>
 					</div>

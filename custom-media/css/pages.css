@@ -98,6 +98,13 @@ body {
 #user-tools a:hover {
 	text-decoration: underline;
 }
+#divNameHeader{
+	color:        #000066;
+	font: 600 26px "Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+	margin-left:      30px;
+	margin-right:      auto;
+	margin-bottom:   15px;
+}
 
 #divPatientForm{
 	color:        #000066;
@@ -147,6 +154,13 @@ body {
 	padding: 10px;
 	font-weight: bold;
 }
+
+.usChoice{
+	color:  #000066;
+	font-size: 12px;
+	padding: 10px;
+}
+
 .dashboard-container {
 	position: absolute;
 	top:           50%;
