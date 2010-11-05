@@ -1,3 +1,6 @@
 *.pyc
 */modules/*
 modules/
+tb.db
+.dropbox
+.htpasswd
