@@ -79,6 +79,11 @@ class Grupo(models.Model):
 	def __str__(self):
 		return self.nome.encode('utf-8')
 
+class HistoricoFicha(models.Model):
+	ficha                     = models.ForeignKey(Ficha)
+	conteudo                  = models.XMLField()
+	data_ultima_modificacao   = models.DateTimeField(auto_now=True)
+
 class Grupo_Formulario(models.Model):
 	CHOICES = (('N', 'Nenhuma') , ('L', 'Leitura'), ('T', u'Leitura e Modificação'))
 	grupo = models.ForeignKey(Grupo)

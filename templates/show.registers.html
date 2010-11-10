@@ -41,14 +41,21 @@
 					<div id='divNameHeader'>
 						{{ patient.nome }}
 					</div>
-					{% for date, xml in registers.items %}
+					{% for r in registers %}
 						<div class='list-header'>
-						Informações inseridas em {{ date|date:"d/M/Y" }}, {{date|date:"H:i:s"}}
+						Informações inseridas em {{ r.data_insercao|date:"d/M/Y" }}, {{r.data_insercao|date:"H:i:s"}}
 						</div>
-						<div class='row-content' id='row-content-{{date|date:'YmdHis'}}'>
+						<div class='toolbox' id='toolbox-{{r.data_insercao|date:'YmdHis'}}'>
+							{% if gf.permissao == 'T' %}
+								<div id='edit-button'>
+									<a class='button' href='{{url}}form/edit/{{r.id}}/' onclick="this.blur();" ><span>Editar conteúdo</span></a>
+								</div>
+							{% endif %}
+						</div>
+						<div class='row-content' id='row-content-{{r.data_insercao|date:'YmdHis'}}'>
 						<script type='text/javascript'>
 							{% autoescape off %}
-							writeTable("{{ xml|addslashes }}", $('#row-content-{{date|date:'YmdHis'}}'));
+							writeTable("{{ r.conteudo|addslashes }}", $('#row-content-{{r.data_insercao|date:'YmdHis'}}'));
 							{% endautoescape %}
 						</script>
 						</div>
