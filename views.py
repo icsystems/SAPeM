@@ -449,3 +449,14 @@ def showFichaConteudo(request, fichaId):
 	xmlStr = ficha.conteudo
 	url = settings.SITE_ROOT
 	return HttpResponse( xmlStr, mimetype="application/xhtml+xml")
+
+def retrieveTriagemName(request, patientId):
+	import_str = 'from forms.models import Paciente, Ficha, Formulario, tipoFormulario'
+	exec import_str
+	patient  = Paciente.objects.get(pk=int(patientId))
+	ficha_qs = Ficha.objects.filter(paciente=patient)
+	tTriagem = tipoFormulario.objects.get(nome='Triagem')
+	triagem = ficha_qs.filter(formulario__tipo=tTriagem)[0] # There is only one Triagem report
+	return HttpResponse(triagem.formulario.nome)
+
+
