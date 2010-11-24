@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 # -*- coding: utf-8 -*-
 
 import os,sys
@@ -272,17 +272,14 @@ def homepage_view(request):
 				profile = UserProfile(user=request.user)
 			profile.save()
 		ft = tipoFormulario.objects.get(nome='Triagem')
-		triagem_form_list = Formulario.objects.filter(tipo=ft)
+		temp = Formulario.objects.filter(tipo=ft)
 		# Remove forms that the user does not have permission
-		for f in triagem_form_list:
-			if groups.count():
-				for gr in groups:
-					gf = Grupo_Formulario.objects.filter(formulario=f).filter(grupo=gr)
-					if gf.count():
-						if gf[0].permissao != 'T':
-							del f
-			else: #User does not belong to any group, so do not access any form
-				triagem_form_list = Formulario.objects.none()
+		if groups.count():
+			gf = Grupo_Formulario.objects.filter(grupo__in=groups).filter(formulario__in = temp).filter(permissao='T')
+			triagem_form_list = [g.formulario for g in gf]
+		else: #User does not belong to any group, so do not access any form
+			triagem_form_list = Formulario.objects.none()
+		del temp
 	url = settings.SITE_ROOT
 	return render_to_response('homepage_template.html',
 			locals(), RequestContext(request, {}))
@@ -320,6 +317,11 @@ def getListOfUS(user):
 				us_list.append(us2)
 	return us_list
 
+def getUSfromTriagem(patient):
+	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha'
+	exec import_str
+	return Ficha.objects.filter(paciente=patient).get(formulario__tipo__nome='Triagem').unidadesaude
+
 def show_patients(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect(settings.SITE_ROOT)
@@ -328,11 +330,17 @@ def show_patients(request):
 	MEDIA = 'custom-media/'
 	us_list =  getListOfUS(request.user)
 	groups       = Grupo.objects.filter(membros=request.user)
-	forms_list = [ gf.formulario for gf in Grupo_Formulario.objects.filter(grupo__in = groups)]
+	forms_list = [
+		Formulario.objects.get(pk=dictFormId.values()[0])
+		for dictFormId in Grupo_Formulario.objects.filter(grupo__in = groups)\
+		.values('formulario').distinct()
+	]
 	patient_list = getPatientList(us_list)
 	patient_fichas = {}
+	patient_us     = {}
 	for p in patient_list:
 		patient_fichas[p.id] = getFilledFormsId(p)
+		patient_us[p.id] = getUSfromTriagem(p)
 	url = settings.SITE_ROOT
 	return render_to_response('show.Patients.html',
 			locals(), RequestContext(request, {}))
@@ -377,7 +385,10 @@ def retrieveFichas(patientId, formType=''):
 		return register_list
 	register_qs = Ficha.objects.filter(paciente=patient)
 	if formType != '':
-		t = tipoFormulario.objects.get(nome=formType)
+		try:
+			t = tipoFormulario.objects.get(nome=formType)
+		except tipoFormulario.DoesNotExist:
+			raise customError('Esse tipo de formulário não existe.')
 		register_qs = register_qs.filter(formulario__tipo=t)
 	if not register_qs:
 		raise customError('A busca não retornou resultados')
@@ -432,9 +443,8 @@ def showPatientRegisters(request,patientId, formId):
 	#Check groups rights
 	groups       = Grupo.objects.filter(membros=request.user)
 	us_list =  getListOfUS(request.user)
-	try:
-		gf = Grupo_Formulario.objects.filter(grupo__in = groups).get(formulario= form)
-	except Grupo_Formulario.DoesNotExist:
+	gf = Grupo_Formulario.objects.filter(grupo__in = groups).filter(formulario= form)
+	if not len(gf):
 		return HttpResponseNotFound('A busca não retornou resultados')
 	url = settings.SITE_ROOT
 	return render_to_response('show.registers.html',
@@ -459,4 +469,28 @@ def retrieveTriagemName(request, patientId):
 	triagem = ficha_qs.filter(formulario__tipo=tTriagem)[0] # There is only one Triagem report
 	return HttpResponse(triagem.formulario.nome)
 
+def retrieveUS(request, opt):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	import_str = 'from forms.models import UserProfile'
+	exec import_str
+	user = UserProfile.objects.get(user=request.user)
+	if opt == 'name':
+		return  HttpResponse(user.unidadesaude_favorita.nome)
+	return HttpResponseNotFound('A busca não retornou resultados')
 
+def retrieveLastReportByType(request, patientId, type):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	import_str = 'from forms.models import Paciente, Ficha, Formulario, tipoFormulario'
+	exec import_str
+	try:
+		ficha = retrieveFichas(patientId, type).latest('data_ultima_modificacao')
+	except customError, e:
+		msg = e.value
+		if request.method == 'GET':
+			url = settings.SITE_ROOT
+			return render_to_response('error.html',
+				locals(), RequestContext(request, {}))
+		return HttpResponseNotFound('A busca não retornou resultados')
+	return HttpResponse( ficha.conteudo, mimetype="application/xhtml+xml")

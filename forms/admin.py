@@ -62,7 +62,6 @@ class FormularioAdmin(admin.ModelAdmin):
 	uninstall_form.short_description = ugettext_lazy(u"Desinstalar %(verbose_name_plural)s selecionados")
 
 admin.site.register(Formulario, FormularioAdmin)
-admin.site.register(tipoFormulario)
 
 #Users definitions
 

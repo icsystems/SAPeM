@@ -10,13 +10,39 @@
 		<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery/jquery.dataTables.js"></script>
 		<script>
 		$(document).ready(function() {
-			var oTable = $('#patient_table').dataTable({
-				"aoColumns"      : [
-					null,
-					{'bSortable':false},
-					{'bSortable':false}
+			oTable = $('#patient_table').dataTable({
+				"fnDrawCallback": function ( oSettings ) {
+					if ( oSettings.aiDisplay.length == 0 )
+					{
+						return;
+					}
+					var nTrs = $('#patient_table tbody tr');
+					var iColspan = nTrs[0].getElementsByTagName('td').length;
+					var sLastGroup = "";
+					for ( var i=0 ; i<nTrs.length ; i++ )
+					{
+						var iDisplayIndex = oSettings._iDisplayStart + i;
+						var sGroup = oSettings.aoData[ oSettings.aiDisplay[iDisplayIndex] ]._aData[0];
+						if ( sGroup != sLastGroup )
+						{
+							var nGroup = document.createElement( 'tr' );
+							var nCell = document.createElement( 'td' );
+							nCell.colSpan = iColspan;
+							nCell.className = "group";
+							nCell.innerHTML = sGroup;
+							nGroup.appendChild( nCell );
+							nTrs[i].parentNode.insertBefore( nGroup, nTrs[i] );
+							sLastGroup = sGroup;
+						}
+					}
+				},
+				"aoColumnDefs": [
+					{ "bVisible": false, "aTargets": [ 0 ] },
+					{ "bSortable": false, "aTargets": ['nonsortable']},
+					{ "bSearchable": false, "aTargets": [ 0,2,3,4 ]},
 				],
-				"iDisplayLength": 25,
+				"aaSortingFixed": [[ 0, 'asc' ]],
+				"aaSorting"     : [[ 1, 'asc']],
 				"sPaginationType": "full_numbers",
 				"oLanguage" : {
 					"sProcessing":   "Processando...",
@@ -26,7 +52,7 @@
 					"sInfoEmpty":    "Mostrando de 0 até 0 de 0 registros",
 					"sInfoFiltered": "(filtrado de _MAX_ registros no total)",
 					"sInfoPostFix":  "",
-					"sSearch":       "Busca:",
+					"sSearch":       "Busca pelo nome do paciente:",
 					"sUrl":          "",
 					"oPaginate": {
 						"sFirst":    "Primeiro",
@@ -34,9 +60,10 @@
 						"sNext":     "Seguinte",
 						"sLast":     "Último"
 					}
-				},
+				}
 			});
 		} );
+
 		</script>
 	</head>
 	<body>
@@ -47,7 +74,7 @@
 					{% if user.is_authenticated %}
 						Bem vindo, <strong>{{ user.username }}</strong>.
 						{% if user.is_staff %}
-							<a href='admin/'>Administração</a> /
+							<a href='{{ url }}admin/'>Administração</a> /
 						{% endif %}
 						<a href='logout/'>Encerrar sessão</a>
 					{% else %}
@@ -63,26 +90,32 @@
 						<table id='patient_table' class='display'>
 							<thead>
 							<tr>
+								<th> Unidade Saúde </th>
 								<th> Nome do Paciente </th>
 								<th> Data do Nascimento</th>
 								<th> Nome da Mãe </th>
 								{% for f in forms_list%}
-									<th> {{ f.nome }}</th>
+									<th class='nonsortable'> {{ f.nome }}</th>
 								{% endfor %}
 							</tr>
 							</thead>
 							<tbody>
 							{% for p in patient_list  %}
 							<tr>
+								<td>  {{ patient_us|hash:p.id }} </td>
 								<td>  {{ p.nome }} </td>
 								<td>  {{ p.data_nascimento }} </td>
 								<td>  {{ p.nome_mae }} </td>
 								{% for f in forms_list %}
 									<td>
-										{% if f.permitir_insercao_multipla or not  f.id in patient_fichas|hash:p.id %}
-											<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/'>
-												<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment icon'/>
-											</a>
+										{% if f.permitir_insercao_multipla or not f.id in patient_fichas|hash:p.id %}
+											{% if  f.tipo.nome != 'Triagem' %}
+												<a href='{{ url }}form/{{ f.id }}/{{ p.id }}/'>
+													<img src='{{ MEDIA_URL }}/images/ed_InsertForm_n.gif' class='insertComment icon'/>
+												</a>
+											{% else %}
+												<img src='{{ MEDIA_URL }}/images/cross.png' class='icon'/>
+											{% endif %}
 										{% endif %}
 										{% if f.id in patient_fichas|hash:p.id %}
 											<a href='{{ url }}registers/{{ f.id }}/{{ p.id }}/'>

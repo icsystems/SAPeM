@@ -17,6 +17,8 @@ from tbForms.views import showPatientRegisters
 from tbForms.views import homepage_view
 from tbForms.views import showFichaConteudo
 from tbForms.views import retrieveTriagemName
+from tbForms.views import retrieveUS
+from tbForms.views import retrieveLastReportByType
 
 admin.autodiscover()
 
@@ -33,6 +35,8 @@ urlpatterns = patterns('',
 	(r'^patientLastRegister/(?P<formId>\d+)/(?P<patientId>\d+)/$', showPatientLastRegister),
 	(r'^registers/(?P<formId>\d+)/(?P<patientId>\d+)/$', showPatientRegisters),
 	(r'^triagemName/(?P<patientId>\d+)/$', retrieveTriagemName),
+	(r'^healthCenter/(?P<opt>\w+?)/$', retrieveUS),
+	(r'^patientLastRegisterByType/(?P<patientId>\d+)/(?P<type>\w+)/$', retrieveLastReportByType),
 	(r'^patients/$', show_patients),
 	(r'^listPatients/$', list_patients),
 	(r'^$', homepage_view),

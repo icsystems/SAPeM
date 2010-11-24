@@ -18,11 +18,11 @@
 					{% if user.is_authenticated %}
 						Bem vindo, <strong>{{ user.username }}</strong>.
 						{% if user.is_staff %}
-							<a href='admin/'>Administração</a> /
+							<a href='{{ url }}admin/'>Administração</a> /
 						{% endif %}
 						<a href='logout/'>Encerrar sessão</a>
 					{% else %}
-						<a href='admin/'>Administração</a>
+						<a href='{{ url }}admin/'>Administração</a>
 					{% endif %}
 				</div>
 			</div>
