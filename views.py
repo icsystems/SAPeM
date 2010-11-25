@@ -446,6 +446,8 @@ def showPatientRegisters(request,patientId, formId):
 	gf = Grupo_Formulario.objects.filter(grupo__in = groups).filter(formulario= form)
 	if not len(gf):
 		return HttpResponseNotFound('A busca não retornou resultados')
+	# Ugly fix. TODO check if this is valid for all situations.
+	gf = gf[0]
 	url = settings.SITE_ROOT
 	return render_to_response('show.registers.html',
 		locals(), RequestContext(request, {}))
