@@ -5,6 +5,12 @@ import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+SERVER_VERSION = True
+COMM_DIR =os.path.join(os.path.expanduser('~'), '.sapem/xml')
+
+if not SERVER_VERSION:
+	if not os.path.isdir(COMM_DIR):
+		os.makedirs(COMM_DIR)
 
 ADMINS = (
     ('Fernando Ferreira', 'fferreira@icsystems.com.br'),

@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import os,sys
-import tempfile
+import tempfile2 as tempfile
+import codecs
 import tarfile
 from unicodedata import normalize
 from datetime import datetime, date, time
 
 from django import forms
 
+from django.db import IntegrityError
 from django.http import HttpResponse,HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -201,8 +203,13 @@ def handle_form(request, formId, patientId, f=''):
 				nome_mae = nome_mae,
 				data_nascimento=data_nascimento
 			)
-			# TODO treat duplicated entries
-			new_patient.save()
+			try:
+				new_patient.save()
+			except IntegrityError:
+				msg = 'Paciente já existente no sistema'
+				url = settings.SITE_ROOT
+				return render_to_response('error.html',
+					locals(), RequestContext(request, {}))
 			p = new_patient
 		else:
 			p = Paciente.objects.get(id=int(patientId))
@@ -229,6 +236,31 @@ def handle_form(request, formId, patientId, f=''):
 				unidadesaude = us,
 				conteudo   = xmlStr
 			)
+		# For sharing info from a portable device to the server
+		if not settings.SERVER_VERSION:
+			f = Formulario.objects.get(id=int(formId))
+			tmp_file = tempfile.NamedTemporaryFile(
+				suffix='.info',
+				prefix='ficha',
+				dir=settings.COMM_DIR,
+			)
+			#Workaround for open a utf-8 file
+			info_filename = tmp_file.name
+			tmp_file.close()
+			info_file = codecs.open(info_filename, 'w', encoding='utf-8')
+			info_file.write(p.nome + '\n')
+			info_file.write(p.data_nascimento + '\n' )
+			info_file.write(p.nome_mae+ '\n')
+			info_file.write(f.nome + '\n')
+			info_file.write(f.tipo.nome + '\n')
+			info_file.write(us.nome)
+			if 'edit' in form.keys():
+				info_file.write('edit')
+			xml_file = codecs.open(info_file.name.replace('.info', '.xml'), 'w',encoding='utf-8')
+			xml_file.write(xmlStr)
+			info_file.close()
+			xml_file.close()
+
 		newFicha.save()
 		return HttpResponseRedirect(settings.SITE_ROOT)
 	# else METHOD == GET
@@ -367,8 +399,8 @@ def sapem_login(request):
 			return render_to_response('error.html',
 				locals(), RequestContext(request, {}))
 		msg = u'Usuário e/ou senha inválida'
-		return render_to_response('homepage_template.html',
-			locals(), RequestContext(request, {}))
+	return render_to_response('homepage_template.html',
+		locals(), RequestContext(request, {}))
 
 def sapem_logout(request):
 	logout(request)
