@@ -7,3 +7,6 @@ register = template.Library()
 def hash(h, key):
 	return h[key]
 
+@register.filter(name='getId')
+def getId(obj):
+	return obj.id

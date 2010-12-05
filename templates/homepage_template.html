@@ -47,7 +47,7 @@
 					<div class='dashboard'>
 						<ul>
 						{% if triagem_form_list|length_is:"1" %}
-							<li id='triagem_menu'> <a href='{{ url }}form/{{triagem_form_list|first}}/0' >Adicionar Paciente (Triagem)</a> </li>
+							<li id='triagem_menu'> <a href='{{ url }}form/{{triagem_form_list|first|getId}}/0' >Adicionar Paciente (Triagem)</a> </li>
 						{% else%}
 							<li id='triagem_menu'> <a href='#' >Adicionar Paciente (Triagem)</a> </li>
 								<ul  class="sub_menu">
