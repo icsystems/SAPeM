@@ -46,6 +46,9 @@
 				<div class='dashboard-container'>
 					<div class='dashboard'>
 						<ul>
+						{% if triagem_form_list|length_is:"1" %}
+							<li id='triagem_menu'> <a href='{{ url }}form/{{triagem_form_list|first}}/0' >Adicionar Paciente (Triagem)</a> </li>
+						{% else%}
 							<li id='triagem_menu'> <a href='#' >Adicionar Paciente (Triagem)</a> </li>
 								<ul  class="sub_menu">
 									{% for f in triagem_form_list %}
@@ -63,8 +66,9 @@
 									</li>
 									{% endfor %}
 								</ul>
+							{% endif %}
 							<li> <a href='patients'>Acessar Formulários</a> </li>
-							<li> <a href='listPatients' >Listar Pacientes</a> </li>
+							<!-- li> <a href='listPatients' >Listar Pacientes</a> </li -->
 						</ul>
 					</div>
 				</div>

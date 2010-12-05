@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os,sys
@@ -253,7 +253,7 @@ def handle_form(request, formId, patientId, f=''):
 			info_file.write(p.nome_mae+ '\n')
 			info_file.write(f.nome + '\n')
 			info_file.write(f.tipo.nome + '\n')
-			info_file.write(us.nome)
+			info_file.write(us.nome + '\n')
 			if 'edit' in form.keys():
 				info_file.write('edit')
 			xml_file = codecs.open(info_file.name.replace('.info', '.xml'), 'w',encoding='utf-8')
