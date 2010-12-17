@@ -308,7 +308,7 @@ def homepage_view(request):
 		# Remove forms that the user does not have permission
 		if groups.count():
 			gf = Grupo_Formulario.objects.filter(grupo__in=groups).filter(formulario__in = temp).filter(permissao='T')
-			triagem_form_list = [g.formulario for g in gf]
+			triagem_form_list = [Formulario.objects.get(pk=g['formulario'])  for g in gf.values('formulario').distinct()]
 		else: #User does not belong to any group, so do not access any form
 			triagem_form_list = Formulario.objects.none()
 		del temp
