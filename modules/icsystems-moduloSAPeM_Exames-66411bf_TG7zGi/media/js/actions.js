@@ -22,12 +22,23 @@ var resistent = new Array();
 //Document is ready, let's play
 $(document).ready(function(){
 
+	var urlString = $(location).attr('href');
+	var urlArray = urlString.split('/');
+	var indexToRunUrlString = 0;
+	var urlbase = '';
+	for (indexToRunUrlString in urlArray)
+		if (urlArray[indexToRunUrlString] == 'sapem')
+			var indexToRecord = indexToRunUrlString;
+	for (indexToRunUrlString in urlArray.slice(0,parseInt(indexToRecord,10) + 1))
+		if (indexToRunUrlString == 0)
+			urlbase += urlArray[indexToRunUrlString];
+		else
+			urlbase += '/' + urlArray[indexToRunUrlString];
+	urlbase += '/';
+
 /*------------------------------Edition and Relation-----------------------------*/
 	//Relation between forms
 	//Unidade - Exames e Triagem
-	var urlString = $(location).attr('href');
-	var urlbase = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/';
-	var urlArray = urlString.split('/');
 	if (urlString.search("edit") != -1){
 		var fichaId = urlArray[urlArray.length-2];
 		var url = urlbase + 'ficha/' + fichaId + '/';
