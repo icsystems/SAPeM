@@ -53,7 +53,7 @@ function writeTable(xmlstring, div){
 	table.addClass('registers');
 	table.css('border-collapse', 'collapse');
 	var tbody = $('<tbody />');
-	if (xml.getElementsByTagName('error')[0] == undefined)
+	if (xml.getElementsByTagName('error')[0] != undefined)
 		throw "Nothing to write"
 	var elements = xml.getElementsByTagName('documento')[0].childNodes;
 	$(elements).each(function(){
@@ -788,10 +788,7 @@ $(document).ready(function(){
 	});
 /*---------------------------------------------------------------------------*/
 /*------------------------- Load Exames Form --------------------------------*/
-	var url=$(location).attr('href');
-	var numForm = parseInt(url[url.length - 4],10) - 1;
-	var numPatient = url[url.length - 2];
-	var sUrl='../../../patientLastRegister/' + numForm + '/' + numPatient + '/';
+	var sUrl='../../../patientLastRegisterByType/' + fichaId + '/Exames/';
 	var edits = new Object();
 	var menuYloc = null;
 
