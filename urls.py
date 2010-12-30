@@ -19,6 +19,7 @@ from tbForms.views import showFichaConteudo
 from tbForms.views import retrieveTriagemName
 from tbForms.views import retrieveUS
 from tbForms.views import retrieveLastReportByType
+from tbForms.views import db2file
 
 admin.autodiscover()
 
@@ -40,6 +41,7 @@ urlpatterns = patterns('',
 	(r'^patients/$', show_patients),
 	(r'^listPatients/$', list_patients),
 	(r'^$', homepage_view),
+	(r'^download/(?P<format>\w+)/$', db2file),
 	(r'^login/$', sapem_login),
 	(r'^logout/$', sapem_logout),
 )
