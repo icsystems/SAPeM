@@ -5,8 +5,10 @@ import os,sys
 import tempfile2 as tempfile
 import codecs
 import tarfile
+
 from unicodedata import normalize
 from datetime import datetime, date, time
+from xml.dom.minidom import parseString, getDOMImplementation
 
 from django import forms
 
@@ -23,8 +25,21 @@ from django.views.generic.simple import direct_to_template
 import settings
 from forms.models import UnidadeSaude
 
-from xml.dom.minidom import parseString, getDOMImplementation
 
+import unicodedata
+
+def strip_accents(s):
+	return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
+
+def smart_truncate_string(str, size):
+	if len(str) < size:
+		return str
+	return str[:size-3].rsplit(' ', 1)[0] + ' ...'
+
+def smart_int(i):
+	if i.isdigit():
+		return int(i)
+	return i
 
 class customError(Exception):
 	def __init__(self, value):
@@ -217,6 +232,9 @@ def handle_form(request, formId, patientId, f=''):
 		for k in form:
 			if k != 'edit':
 				keys.append(k)
+		# Protection for empty submissions
+		if not len(keys):
+			return HttpResponseNotFound(u'Formulário submetido vazio')
 		xmlStr = createXML(keys, form)
 		us = request.user.get_profile().unidadesaude_favorita
 		if 'edit' in form.keys():
@@ -528,3 +546,75 @@ def retrieveLastReportByType(request, patientId, type):
 				locals(), RequestContext(request, {}))
 		return HttpResponseNotFound('A busca não retornou resultados')
 	return HttpResponse( ficha.conteudo, mimetype="application/xhtml+xml")
+
+def db2file(request, format='excel'):
+	from forms.models import Ficha, Formulario
+	response = HttpResponseNotFound('Formato invalido')
+	if format == 'excel':
+		import xlwt
+		# Create file-like object
+		response = HttpResponse(mimetype='application/ms-excel')
+		filename = 'pacientes.xls'
+		response['Content-Disposition'] = 'attachment; filename="'+ filename +'"'
+		# Get Fichas grouped by Formularios
+		forms = Formulario.objects.all()
+		fichas = Ficha.objects.all()
+		wb = xlwt.Workbook(encoding='utf-8')
+		# Default styles
+		BG0 = xlwt.Pattern()
+		BG0.pattern = BG0.SOLID_PATTERN
+		BG0.pattern_fore_colour = 22
+		BG1 = xlwt.Pattern()
+		BG1.pattern = BG1.SOLID_PATTERN
+		BG1.pattern_fore_colour = 47
+		font0 = xlwt.Font()
+		font0.name = 'Arial'
+		font0.bold = True
+		font1 = xlwt.Font()
+		font1.name = 'Arial'
+		header_style = xlwt.XFStyle()
+		header_style.font = font0
+		header_style.pattern = BG0
+		body_style = xlwt.XFStyle()
+		body_style.font = font1
+		body_style.pattern = BG1
+
+		for f in forms:
+			# Tip: Excel just allows sheet names up to 31 caracters
+			ws = wb.add_sheet(smart_truncate_string(f.nome, 31))
+			ws.write(0, 0, u"Nome do paciente", header_style )
+			ws.write(0, 1, u"Data de nascimento",header_style )
+			ws.write(0, 2, u"Nome da mãe",header_style)
+			ws.write(0, 3, u"Unidade de saúde",header_style)
+			ws.col(0).width = 9000
+			ws.col(1).width = 5000
+			ws.col(2).width = 9000
+			ws.col(3).width = 12000
+			headers = {}
+			index = 4
+			for row, ficha in enumerate(fichas.filter(formulario=f)):
+				ws.write(row+1,0,ficha.paciente.nome, body_style)
+				ws.write(row+1,1,ficha.paciente.data_nascimento, body_style)
+				ws.write(row+1,2, ficha.paciente.nome_mae, body_style)
+				ws.write(row+1,3,ficha.unidadesaude.nome, body_style)
+				# Parse ficha
+				xml = parseString(ficha.conteudo.encode("utf-8" ))
+				for field in xml.firstChild.childNodes:
+					if not field.tagName in headers.keys():
+						headers[field.tagName] = index
+						ws.col(index).width = 4000
+						ws.write(0, index, field.tagName ,header_style)
+						index = index + 1
+					try:
+						ws.write(
+						row+1,headers[field.tagName],
+						', '.join(["%s"%(smart_int(f.firstChild.nodeValue))
+							for f in xml.getElementsByTagName(field.tagName)]),
+						body_style)
+					except:
+						pass
+		wb.save(response)
+	return response
+
+
+
