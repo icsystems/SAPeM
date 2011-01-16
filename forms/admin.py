@@ -17,8 +17,6 @@ from django.utils.translation import ugettext_lazy, ugettext as _
 class UnidadeSaudeAdmin(admin.ModelAdmin):
 	list_display  = ('nome', 'cidade', 'UF')
 	list_filter   = ('cidade', 'UF')
-	class Media:
-		js= ('js/jquery/admin_formulario.js',)
 admin.site.register(UnidadeSaude, UnidadeSaudeAdmin)
 
 class FormularioAdmin(admin.ModelAdmin):

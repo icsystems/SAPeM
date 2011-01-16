@@ -232,6 +232,9 @@ def handle_form(request, formId, patientId, f=''):
 		for k in form:
 			if k != 'edit':
 				keys.append(k)
+		# Protection for empty submissions
+		if not len(keys):
+			return HttpResponseNotFound(u'Formulário submetido vazio')
 		xmlStr = createXML(keys, form)
 		us = request.user.get_profile().unidadesaude_favorita
 		if 'edit' in form.keys():
