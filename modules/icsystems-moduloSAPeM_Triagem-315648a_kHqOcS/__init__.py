@@ -5,7 +5,6 @@ import os.path
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import django.views.static as static
-import mlp_net
 import autocomplete as ac
 import runNet as rn
 

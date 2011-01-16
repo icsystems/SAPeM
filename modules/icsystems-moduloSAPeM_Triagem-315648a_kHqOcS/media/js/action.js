@@ -118,7 +118,6 @@ function getTime(){
 
 //After page is loaded set actions
 $(document).ready(function(){
-
 /*------------------------------Edition and Relation-----------------------------*/
 	//Relation between forms
 	//Diagnóstico - Triagem e Exames
