@@ -121,6 +121,11 @@
 											<a href='{{ url }}registers/{{ f.id }}/{{ p.id }}/'>
 												<img src='{{ MEDIA_URL }}/images/icon-view-eye.gif' class='viewReport icon' target='_blank'/>
 											</a>
+											{% if f.tipo.nome == "Triagem" and 'NeuralTB' in f.nome %}
+												<a href='{{ url }}art/{{ f.id }}/{{p.id}}'>
+													<img src='{{MEDIA_URL }}/images/traffic_light.png' class='viewReport icon' target='_blank'/>
+												</a>
+											{% endif %}
 										{% endif %}
 									</td>
 								{% endfor %}

@@ -5,6 +5,8 @@ import os,sys
 import tempfile2 as tempfile
 import codecs
 import tarfile
+import cStringIO
+import Image,ImageDraw
 
 from unicodedata import normalize
 from datetime import datetime, date, time
@@ -616,5 +618,107 @@ def db2file(request, format='excel'):
 		wb.save(response)
 	return response
 
+def art_view (request, formId, patientId):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario, Grupo, Grupo_Formulario'
+	exec import_str
+	ficha = Ficha.objects.filter(paciente__id = patientId).filter(formulario__tipo__nome='Triagem')[0]
+	if int(formId) != int(ficha.formulario.id):
+		return HttpResponseNotFound(u'O formulário requisitado é invalido para esse paciente.')
+
+	xmlContent = ficha.conteudo
+
+	#from xml dict
+	doc = parseString(xmlContent.encode('utf-8'))
+
+	nodes = doc.firstChild.childNodes
+	dictValues = {}
+
+	for node in nodes:
+		if node.firstChild:
+			dictValues[node.nodeName] = node.firstChild.nodeValue
+
+	#Translate input tags
+	fields = (
+		'idade',
+		'tosse',
+		'hemoptoico',
+		'sudorese',
+		'febre',
+		'emagrecimento',
+		'dispneia',
+		'emagrecimento',
+		'fumante',
+		'TBXPulmonar',
+		'internacaoHospitalar',
+		'sida'
+	)
+	values = []
+	for f in fields:
+		try:
+			value = dictValues[f]
+			if f == 'idade':
+				values.append(int(value))
+			elif value == 'nao':
+				values.append(-1)
+			elif value == 'jamais':
+				values.append(-1)
+			elif value == 'sim':
+				values.append(1)
+			else:
+				values.append(0)
+		except:
+			values.append(0)
+	from art import ART
+	import numpy as np
+	art = ART(np.array(values, float), config_file='%s/art_conf.npz'%os.path.dirname(os.path.realpath(__file__)))
+	art.net()
+	index, r, R = art.getOutput()
+	img = Image.new("RGB", (210,730), "#FFFFFF")
+	draw = ImageDraw.Draw(img)
+	colorON = ['green', 'yellow', 'red']
+	color   = ['#98FB98','#EEE8AA','#CD9B9B']
+	if index != None:
+		color[index] = colorON[index]
+	for k in range(3):
+		draw.ellipse((0, k*210, 200, k*210 + 200), fill=color[k], outline=color[k])
+		draw.point((100, 100+210*k), fill='black')
+	if r:
+		ri = 100*r/R
+	draw.arc((100-ri,(index*210) + 100 -ri ,100+ri ,index*210 + 100 + ri), 0, 360, fill='black')
+	f = cStringIO.StringIO()
+	img.save(f, "PNG")
+	f.seek(0)
+	return HttpResponse (f.read(),mimetype='image/png' )
 
 
+	return HttpResponse(r)
+
+def showARTResult(request,patientId, formId):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario, Grupo, Grupo_Formulario'
+	exec import_str
+	form = Formulario.objects.get(id=formId)
+	try:
+		registers = retrieveFichas(int(patientId), form.tipo)
+	except customError, e:
+		msg = e.value
+		if request.method == 'GET':
+			url = settings.SITE_ROOT
+			return render_to_response('error.html',
+				locals(), RequestContext(request, {}))
+		return HttpResponseNotFound('A busca não retornou resultados')
+	patient = Paciente.objects.get(id=int(patientId))
+	#Check groups rights
+	groups       = Grupo.objects.filter(membros=request.user)
+	us_list =  getListOfUS(request.user)
+	gf = Grupo_Formulario.objects.filter(grupo__in = groups).filter(formulario= form)
+	if not len(gf):
+		return HttpResponseNotFound('A busca não retornou resultados')
+	# Ugly fix. TODO check if this is valid for all situations.
+	gf = gf[0]
+	url = settings.SITE_ROOT
+	return render_to_response('traffic_light_template.html',
+		locals(), RequestContext(request, {}))

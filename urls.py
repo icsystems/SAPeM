@@ -20,6 +20,8 @@ from tbForms.views import retrieveTriagemName
 from tbForms.views import retrieveUS
 from tbForms.views import retrieveLastReportByType
 from tbForms.views import db2file
+from tbForms.views import art_view
+from tbForms.views import showARTResult
 
 admin.autodiscover()
 
@@ -44,5 +46,7 @@ urlpatterns = patterns('',
 	(r'^download/(?P<format>\w+)/$', db2file),
 	(r'^login/$', sapem_login),
 	(r'^logout/$', sapem_logout),
+	(r'^art_image/(?P<formId>\d+)/(?P<patientId>\d+)/$', art_view),
+	(r'^art/(?P<formId>\d+)/(?P<patientId>\d+)/$', showARTResult),
 )
 
