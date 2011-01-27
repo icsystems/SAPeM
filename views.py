@@ -382,6 +382,7 @@ def show_patients(request):
 	MEDIA = 'custom-media/'
 	us_list =  getListOfUS(request.user)
 	groups       = Grupo.objects.filter(membros=request.user)
+	group_names = [g.nome for g in groups]
 	forms_list = [
 		Formulario.objects.get(pk=dictFormId.values()[0])
 		for dictFormId in Grupo_Formulario.objects.filter(grupo__in = groups)\
@@ -700,6 +701,8 @@ def showARTResult(request,patientId, formId):
 		return HttpResponseRedirect(settings.SITE_ROOT)
 	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario, Grupo, Grupo_Formulario'
 	exec import_str
+	if not u'Implementação' in [g.nome for g in Grupo.objects.filter(membros=request.user)]:
+		return HttpResponseNotFound(u'Permissão Negada')
 	form = Formulario.objects.get(id=formId)
 	try:
 		registers = retrieveFichas(int(patientId), form.tipo)
