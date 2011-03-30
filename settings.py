@@ -18,7 +18,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 #Site URL. Please edit if the system is moved
-SITE_ROOT = 'https://gruyere.lps.ufrj.br/~fferreira/sapem/'
+SITE_ROOT = '/sapem/'
 #SITE_ROOT = 'http://localhost:8000/'
 
 DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
