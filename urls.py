@@ -5,6 +5,7 @@ from django.contrib import admin
 #Custom
 from tbForms.admin_views import edit_formulario, add_formulario
 from tbForms.views import correct_address
+from tbForms.views import ffrequired
 from tbForms.views import list_forms_by_health_unit
 from tbForms.views import edit_form
 from tbForms.views import handle_form
@@ -30,6 +31,7 @@ urlpatterns = patterns('',
 	(r'^admin/forms/formulario/add/$', add_formulario),
 	(r'^admin/forms/formulario/(\d)/$', edit_formulario),
 	(r'^admin/', include(admin.site.urls)),
+	(r'^FirefoxRequerido/', ffrequired),
 	(r'^addressService/cep/(\d{5}-\d{3})/$', correct_address),
 	(r'^showForms/(?P<healthUnit>\d)/$', list_forms_by_health_unit),
 	(r'^form/(?P<formId>\d+)/(?P<patientId>\d+)/(?P<f>.*)$', handle_form),

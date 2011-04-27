@@ -725,3 +725,8 @@ def showARTResult(request,patientId, formId):
 	url = settings.SITE_ROOT
 	return render_to_response('traffic_light_template.html',
 		locals(), RequestContext(request, {}))
+
+def ffrequired(request):
+	return render_to_response('firefox.html',
+		locals(), RequestContext(request, {}))
+
