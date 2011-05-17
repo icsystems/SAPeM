@@ -14,6 +14,7 @@ from xml.dom.minidom import parseString, getDOMImplementation
 
 from django import forms
 
+from django.core import serializers
 from django.db import IntegrityError
 from django.http import HttpResponse,HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -374,6 +375,34 @@ def getUSfromTriagem(patient):
 	exec import_str
 	return Ficha.objects.filter(paciente=patient).get(formulario__tipo__nome='Triagem').unidadesaude
 
+def formOrderList(usr):
+	import_str = 'from forms.models import Grupo_Formulario, Grupo, Formulario'
+	exec import_str
+	groups = Grupo.objects.filter(membros=usr)
+	forms  = []
+	formsOrder = ['Triagem', 'Consulta', 'Exames', 'Follow-up']
+	for t in formsOrder:
+		forms.extend(
+			Grupo_Formulario.objects.filter(formulario__tipo__nome=t).filter(grupo__in = groups)\
+				.values_list('formulario', flat=True).distinct()
+			)
+	form_list =[]
+	for id in forms:
+		form_list.append(Formulario.objects.get(pk=id))
+	return form_list
+
+def retrieveUnidadesSaude(request):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect(settings.SITE_ROOT)
+	import_str = 'from forms.models import UnidadeSaude'
+	exec import_str
+
+	unidades = UnidadeSaude.objects.all()
+
+	data = serializers.serialize('json', unidades, fields=('nome',))
+	return HttpResponse(data, mimetype='application/json')
+
+
 def show_patients(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect(settings.SITE_ROOT)
@@ -383,7 +412,8 @@ def show_patients(request):
 	us_list =  getListOfUS(request.user)
 	groups       = Grupo.objects.filter(membros=request.user)
 	group_names = [g.nome for g in groups]
-	forms_list = [
+	forms_list = formOrderList(request.user)
+	forms_list2 = [
 		Formulario.objects.get(pk=dictFormId.values()[0])
 		for dictFormId in Grupo_Formulario.objects.filter(grupo__in = groups)\
 		.values('formulario').distinct()

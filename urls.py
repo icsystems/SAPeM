@@ -23,6 +23,7 @@ from tbForms.views import retrieveLastReportByType
 from tbForms.views import db2file
 from tbForms.views import art_view
 from tbForms.views import showARTResult
+from tbForms.views import retrieveUnidadesSaude
 
 admin.autodiscover()
 
@@ -50,5 +51,6 @@ urlpatterns = patterns('',
 	(r'^logout/$', sapem_logout),
 	(r'^art_image/(?P<formId>\d+)/(?P<patientId>\d+)/$', art_view),
 	(r'^art/(?P<formId>\d+)/(?P<patientId>\d+)/$', showARTResult),
+	(r'^unidadesSaude/json/$', retrieveUnidadesSaude),
 )
 
