@@ -399,7 +399,7 @@ def retrieveUnidadesSaude(request):
 
 	unidades = UnidadeSaude.objects.all()
 
-	data = serializers.serialize('json', unidades, fields=('nome',))
+	data = serializers.serialize('json', unidades, fields=('nome', 'cidade', 'UF'))
 	return HttpResponse(data, mimetype='application/json')
 
 
@@ -731,9 +731,10 @@ def showARTResult(request,patientId, formId):
 		return HttpResponseRedirect(settings.SITE_ROOT)
 	import_str = 'from forms.models import Paciente, UnidadeSaude,Ficha, Formulario, Grupo, Grupo_Formulario'
 	exec import_str
-	if not u'Implementação' in [g.nome for g in Grupo.objects.filter(membros=request.user)]:
-		return HttpResponseNotFound(u'Permissão Negada')
 	form = Formulario.objects.get(id=formId)
+	if not u'Implementação' in form.nome:
+		return HttpResponseNotFound( form.nome )
+		return HttpResponseNotFound(u'Permissão Negada')
 	try:
 		registers = retrieveFichas(int(patientId), form.tipo)
 	except customError, e:
